@@ -24,7 +24,7 @@ class EpochLogger(CallbackAny2Vec):
 
 def train(training_data, output_model):
     print('Retrieving data ... ')
-    df = pd.read_json(training_data, lines=True)[:10]
+    df = pd.read_json(training_data, lines=True)
 
     texts = [text.split() for text in df['body']]
     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(texts)]
