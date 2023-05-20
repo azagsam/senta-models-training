@@ -21,22 +21,37 @@ def no_src_duplicates():
 
 def grades():
     tgt_grades = set(df['tgt_grade'].unique())
+    df['doc_id_int'] = df['doc_id'].apply(lambda x: int(x[3:]))
     for grade in tgt_grades:
         graded_df = df[df['tgt_grade'] == grade]
-        train, val, test = np.split(graded_df.sample(frac=1, random_state=42),
-                                    [int(.9 * len(graded_df)), int(.95 * len(graded_df))])
+        train, val, test = graded_df[graded_df['doc_id_int'] < 1000], graded_df[(graded_df['doc_id_int'] >= 1000) & (graded_df['doc_id_int'] <= 1020)], graded_df[graded_df['doc_id_int'] > 1020]
         print(len(train), len(val), len(test))
-        os.makedirs(f'data/newsela_data/newsela-translated/target-grade-{grade}', exist_ok=True)
-        train.to_json(f'data/newsela_data/newsela-translated/target-grade-{grade}/train.jsonl', lines=True, force_ascii=False,
+        os.makedirs(f'data/newsela_data/newsela-translated/target-grade-{grade}-dedup', exist_ok=True)
+        train.to_json(f'data/newsela_data/newsela-translated/target-grade-{grade}-dedup/train.jsonl', lines=True, force_ascii=False,
                       orient='records')
-        val.to_json(f'data/newsela_data/newsela-translated/target-grade-{grade}/val.jsonl', lines=True, force_ascii=False,
+        val.to_json(f'data/newsela_data/newsela-translated/target-grade-{grade}-dedup/val.jsonl', lines=True, force_ascii=False,
                     orient='records')
-        test.to_json(f'data/newsela_data/newsela-translated/target-grade-{grade}/test.jsonl', lines=True, force_ascii=False,
+        test.to_json(f'data/newsela_data/newsela-translated/target-grade-{grade}-dedup/test.jsonl', lines=True, force_ascii=False,
                      orient='records')
+
+
+def chatgpt_prompts():
+    graded_df = df[(df['src_grade'] == 'V0') & (df['tgt_grade'] == 'V4')]
+    graded_df = graded_df.sample(frac=1)
+    print('Poenostavi stavke glede na zglede:\n\n')
+    for idx, row in graded_df.sample(n=10).iterrows():
+        print(idx, '"', row['src_sent_sl'], '"',  '->', '"', row['tgt_sent_sl'], '"')
+    for idx, row in graded_df.sample(n=1).iterrows():
+        print('\n', '"', row['src_sent_sl'], '"',  '->')
+
+    print()
+
 
 
 if __name__ == '__main__':
     df = pd.read_json('data/newsela_data/newsela-translated/translations.jsonl', lines=True)
+    df['doc_id'][0] = 'DOC1'
     # full_dataset()
     # no_src_duplicates()
     grades()
+    # chatgpt_prompts()
