@@ -10,9 +10,9 @@ from transformers import T5Tokenizer, MT5Tokenizer
 from random import choices
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
-target_grades = ['V1', 'V2', 'V3', 'V4']
+target_grades = ['V4']
 for g in target_grades:
-    dataset_name = f'target-grade-{g}'
+    dataset_name = f'target-grade-{g}-dedup'
     data_files = {"train": f"data/newsela_data/newsela-translated/{dataset_name}/train.jsonl",
                   "test": f"data/newsela_data/newsela-translated/{dataset_name}/test.jsonl",
                   "val": f"data/newsela_data/newsela-translated/{dataset_name}/val.jsonl"}
@@ -26,7 +26,7 @@ for g in target_grades:
     model = T5ForConditionalGeneration.from_pretrained(model_name)
 
     # preprocess data
-    prefix = "simplify: "  # no need for that in MT5
+    prefix = "simplify: "
 
     indices = choices(list(range(len(newsela['test']))), k=5)
     print(model_name)

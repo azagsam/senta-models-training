@@ -7,11 +7,11 @@ from transformers import DataCollatorForSeq2Seq, MT5ForConditionalGeneration
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
 from transformers import T5ForConditionalGeneration
 from transformers import T5Tokenizer, MT5Tokenizer
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 target_grades = ['V1', 'V2', 'V3', 'V4']
 for g in target_grades:
-    dataset_name = f'target-grade-{g}'
+    dataset_name = f'target-grade-{g}-dedup'
     data_files = {"train": f"data/newsela_data/newsela-translated/{dataset_name}/train.jsonl",
                   "test": f"data/newsela_data/newsela-translated/{dataset_name}/test.jsonl",
                   "val": f"data/newsela_data/newsela-translated/{dataset_name}/val.jsonl"}
@@ -73,7 +73,7 @@ for g in target_grades:
         return {k: round(v, 4) for k, v in result.items()}
 
 
-    exp = f't5-baseline-target-grade-{g}'
+    exp = f'{model_name.replace("/", "-")}-baseline-target-grade-{g}'
     output_dir = os.path.join("./results", exp)
     save_path = os.path.join('./model/baseline', exp)
     log_dir = os.path.join('./logs', exp)
@@ -89,7 +89,7 @@ for g in target_grades:
         num_train_epochs=3,
         fp16=False,
         save_steps=2500,
-        eval_steps=10000,
+        eval_steps=10,
         logging_steps=100,
         logging_dir=log_dir,
         gradient_accumulation_steps=1,
