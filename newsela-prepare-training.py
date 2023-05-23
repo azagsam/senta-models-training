@@ -35,6 +35,24 @@ def grades():
                      orient='records')
 
 
+def one2many():
+    df['doc_id_int'] = df['doc_id'].apply(lambda x: int(x[3:]))
+    subset = df[df['src_grade'] == 'V0']
+    subset['src_sent_sl'] = subset['src_sent_sl'] + ' ' + subset['tgt_grade'].apply(lambda x: '[' + x + ']')
+    train, val, test = subset[subset['doc_id_int'] < 1000], subset[(subset['doc_id_int'] >= 1000) & (subset['doc_id_int'] <= 1020)], subset[subset['doc_id_int'] > 1020]
+    print(len(train), len(val), len(test))
+    os.makedirs(f'data/newsela_data/newsela-translated/target-grade-one2many', exist_ok=True)
+    train.to_json(f'data/newsela_data/newsela-translated/target-grade-one2many/train.jsonl', lines=True,
+                  force_ascii=False,
+                  orient='records')
+    val.to_json(f'data/newsela_data/newsela-translated/target-grade-one2many/val.jsonl', lines=True,
+                force_ascii=False,
+                orient='records')
+    test.to_json(f'data/newsela_data/newsela-translated/target-grade-one2many/test.jsonl', lines=True,
+                 force_ascii=False,
+                 orient='records')
+
+
 def chatgpt_prompts():
     graded_df = df[(df['src_grade'] == 'V0') & (df['tgt_grade'] == 'V4')]
     graded_df = graded_df.sample(frac=1)
@@ -53,5 +71,6 @@ if __name__ == '__main__':
     df['doc_id'][0] = 'DOC1'
     # full_dataset()
     # no_src_duplicates()
-    grades()
+    # grades()
     # chatgpt_prompts()
+    one2many()
