@@ -21,14 +21,14 @@ for g in target_grades:
     # load metric
     metric = load_metric("rouge")
 
-    model_name = f'model/baseline/t5-baseline-target-grade-{g}'
+    model_name = f'model/baseline/cjvt-t5-sl-small-baseline-target-grade-{g}'
     tokenizer = T5Tokenizer.from_pretrained(model_name)
     model = T5ForConditionalGeneration.from_pretrained(model_name)
 
     # preprocess data
     prefix = "simplify: "
 
-    indices = choices(list(range(len(newsela['test']))), k=5)
+    indices = choices(list(range(len(newsela['test']))), k=25)
     print(model_name)
     for n in indices:
         sent = newsela["test"][n]['src_sent_sl']
