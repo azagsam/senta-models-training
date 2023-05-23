@@ -77,7 +77,7 @@ for g in target_grades:
         per_device_eval_batch_size=8,
         # weight_decay=0.01,
         save_total_limit=3,
-        num_train_epochs=10,
+        num_train_epochs=3,
         # fp16=False,
         save_steps=2500,
         eval_steps=1000,

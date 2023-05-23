@@ -1,34 +1,13 @@
 import os
+from random import choices
 
 import nltk
-import numpy as np
-import torch
 from datasets import load_dataset, load_metric
-from transformers import DataCollatorForSeq2Seq, MT5ForConditionalGeneration, AutoModelForCausalLM, AutoTokenizer, \
-    StoppingCriteriaList, StoppingCriteria
-from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
-from transformers import T5ForConditionalGeneration
-from transformers import T5Tokenizer, MT5Tokenizer
-from random import choices
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 target_grades = ['V4']
-
-
-# class StoppingCriteriaSub(StoppingCriteria):
-#
-#     def __init__(self, stops = [], encounters=1):
-#         super().__init__()
-#         self.stops = [stop.to("cuda") for stop in stops]
-#
-#     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor):
-#         for stop in self.stops:
-#             if torch.all((stop == input_ids[0][-len(stop):])).item():
-#                 return True
-#
-#         return False
-
-
 for g in target_grades:
     dataset_name = f'target-grade-{g}-dedup'
     data_files = {"train": f"data/newsela_data/newsela-translated/{dataset_name}/train.jsonl",
@@ -44,7 +23,7 @@ for g in target_grades:
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # preprocess data
-    prefix = "simplify: "  # no need for that in MT5
+    prefix = "simplify: "
 
     indices = choices(list(range(len(newsela['test']))), k=25)
     print(model_name)
@@ -84,7 +63,6 @@ for g in target_grades:
         rouge_results = {key: value.mid.fmeasure * 100 for key, value in result.items()}
         print('ROUGE:', rouge_results)
 
-
         # for i in list(range(len(outputs))):
         #     decoded_preds = tokenizer.decode(outputs[i], skip_special_tokens=True)
         #     print(f"PREDICTION {i}:\t", decoded_preds, '\n')
@@ -103,4 +81,4 @@ for g in target_grades:
         #     # for can in tokenizer.batch_decode(outputs, skip_special_tokens=True):
         #     #     print(can)
 
-        print('\n'*3)
+        print('\n' * 3)
