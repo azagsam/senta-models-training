@@ -6,6 +6,7 @@ from datasets import load_dataset, load_metric
 from transformers import T5ForConditionalGeneration
 from transformers import T5Tokenizer
 from collections import defaultdict
+import pandas as pd
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -21,33 +22,39 @@ mverb_model_name = f'/home/azagar/myfiles/slo-kit/model/mverb/cjvt-t5-sl-small-m
 mverb_tokenizer = T5Tokenizer.from_pretrained(mverb_model_name)
 mverb_model = T5ForConditionalGeneration.from_pretrained(mverb_model_name)
 
-with open('/home/azagar/myfiles/slo-kit/data/eval/literatura/detektiv-dante.txt') as f:
-    text = f.read()
+# with open('/home/azagar/myfiles/slo-kit/data/eval/literatura/detektiv-dante.txt') as f:
+#     text = f.read()
 
-print(text)
-text_sentences = nltk.sent_tokenize(text)
+df = pd.read_json('/home/azagar/myfiles/slo-kit/data/eval/eval_small.jsonl', lines=True)
+for idx, sample in enumerate(df['text']):
+    print(idx)
+    text_sentences = nltk.sent_tokenize(sample, language='slovene')
 
-for sent in text_sentences:
-    input_ids = headline_tokenizer(f"summarize: {sent}", return_tensors="pt", max_length=512,
-                                   truncation=True).input_ids
-    input_ids = input_ids.to("cpu")
-    outputs = headline_model.generate(input_ids, max_length=128)
+    simplified_full_text = []
+    for sent in text_sentences:
+        print('SOURCE:', sent)
+        input_ids = headline_tokenizer(f"summarize: {sent}", return_tensors="pt", max_length=512,
+                                       truncation=True).input_ids
+        input_ids = input_ids.to("cpu")
+        outputs = headline_model.generate(input_ids, max_length=128)
 
-    headline_text = headline_tokenizer.decode(outputs[0], skip_special_tokens=True)
+        headline_text = headline_tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    prefix = "correct: "
-    input_ids = mverb_tokenizer(f"{prefix} {headline_text}", return_tensors="pt", max_length=32,
-                                truncation=True).input_ids
-    input_ids = input_ids.to("cpu")
-    outputs = mverb_model.generate(input_ids,
-                                   max_length=32,
-                                   num_beams=5,
-                                   do_sample=True,
-                                   top_k=5,
-                                   temperature=0.7
-                                   # num_return_sequences=5
-                                   )
+        prefix = "correct: "
+        input_ids = mverb_tokenizer(f"{prefix} {headline_text}", return_tensors="pt", max_length=32,
+                                    truncation=True).input_ids
+        input_ids = input_ids.to("cpu")
+        outputs = mverb_model.generate(input_ids,
+                                       max_length=32,
+                                       num_beams=5,
+                                       do_sample=True,
+                                       top_k=5,
+                                       temperature=0.7
+                                       # num_return_sequences=5
+                                       )
 
-    simplified_text = mverb_tokenizer.decode(outputs[0], skip_special_tokens=True)
-    print(sent, '\t', simplified_text)
-    print('\n')
+        simplified_text = mverb_tokenizer.decode(outputs[0], skip_special_tokens=True)
+        simplified_full_text.append(simplified_text)
+        print('TARGET:', simplified_text)
+        print('\n')
+    print("\n".join(simplified_full_text))
