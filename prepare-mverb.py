@@ -8,20 +8,16 @@ import classla
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 def splt():
-    df = pd.read_json('data/mverb-small.jsonl', lines=True)
-    train, val, test = np.split(df.sample(frac=1, random_state=42), [int(.90 * len(df)), int(.95 * len(df))])
-    train.to_json('data/cckres-mverb-small/train.jsonl', lines=True, force_ascii=False, orient='records')
-    val.to_json('data/cckres-mverb-small/val.jsonl', lines=True, force_ascii=False, orient='records')
-    test.to_json('data/cckres-mverb-small/test.jsonl', lines=True, force_ascii=False, orient='records')
+    df = pd.read_json('data/mverb.jsonl', lines=True)
+    train, val, test = np.split(df.sample(frac=1, random_state=42), [int(.98 * len(df)), int(.99 * len(df))])
+    train.to_json('data/cckres-mverb/train.jsonl', lines=True, force_ascii=False, orient='records')
+    val.to_json('data/cckres-mverb/val.jsonl', lines=True, force_ascii=False, orient='records')
+    test.to_json('data/cckres-mverb/test.jsonl', lines=True, force_ascii=False, orient='records')
 
 
 def main():
-    t = 0
     d = defaultdict(list)
     for file in tqdm(os.listdir('data/cckresV1_0-text')):
-        t += 1
-        if t == 100:
-            break
         with open(os.path.join('data/cckresV1_0-text', file)) as f:
             for line in f:
                 target = []
@@ -46,6 +42,6 @@ def main():
 if __name__ == '__main__':
     nlp = classla.Pipeline('sl', processors='tokenize,pos')  # initialize the default Slovenian pipeline, use hr for Croatian, sr for Serbian, bg for Bulgarian, mk for Macedonian
 
-    main()
-    # splt()
+    # main()
+    splt()
 

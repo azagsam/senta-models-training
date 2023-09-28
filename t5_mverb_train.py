@@ -10,7 +10,7 @@ from transformers import T5Tokenizer, MT5Tokenizer
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
-dataset_name = f'cckres-mverb-small'
+dataset_name = f'cckres-mverb'
 data_files = {"train": f"data/{dataset_name}/train.jsonl",
               "test": f"data/{dataset_name}/test.jsonl",
               "val": f"data/{dataset_name}/val.jsonl"}
@@ -30,10 +30,10 @@ prefix = "correct: "  # no need for that in MT5
 
 def preprocess_function(examples):
     inputs = [prefix + doc for doc in examples["src_sent"]]
-    model_inputs = tokenizer(inputs, max_length=24, truncation=True)
+    model_inputs = tokenizer(inputs, max_length=64, truncation=True)
 
     with tokenizer.as_target_tokenizer():
-        labels = tokenizer(examples["tgt_sent"], max_length=24, truncation=True)
+        labels = tokenizer(examples["tgt_sent"], max_length=64, truncation=True)
 
     model_inputs["labels"] = labels["input_ids"]
     return model_inputs
@@ -81,14 +81,14 @@ training_args = Seq2SeqTrainingArguments(
     overwrite_output_dir=False,
     evaluation_strategy="steps",
     learning_rate=5e-5,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
     # weight_decay=0.01,
     save_total_limit=3,
     num_train_epochs=3,
     fp16=False,
     save_steps=10000,
-    eval_steps=10000,
+    eval_steps=10000000,
     logging_steps=100,
     logging_dir=log_dir,
     gradient_accumulation_steps=1,

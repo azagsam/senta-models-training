@@ -26,6 +26,7 @@ mverb_model = T5ForConditionalGeneration.from_pretrained(mverb_model_name)
 #     text = f.read()
 
 df = pd.read_json('/home/azagar/myfiles/slo-kit/data/eval/eval_small.jsonl', lines=True)
+simplified_sentences = []
 for idx, sample in enumerate(df['text']):
     print(idx)
     text_sentences = nltk.sent_tokenize(sample, language='slovene')
@@ -55,6 +56,11 @@ for idx, sample in enumerate(df['text']):
 
         simplified_text = mverb_tokenizer.decode(outputs[0], skip_special_tokens=True)
         simplified_full_text.append(simplified_text)
+        simplified_sentences.append(simplified_text)
         print('TARGET:', simplified_text)
         print('\n')
     print("\n".join(simplified_full_text))
+
+df2 = pd.read_json('output/inference_results_klemen.jsonl', lines=True)
+df2['simplified_sent_2'] = simplified_sentences
+df2.to_json('output/inference_results_2.jsonl', lines=True, force_ascii=False, orient='records')

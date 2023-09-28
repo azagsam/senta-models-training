@@ -10,7 +10,7 @@ from transformers import T5Tokenizer, MT5Tokenizer
 from random import choices
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-dataset_name = f'cckres-mverb-small'
+dataset_name = f'cckres-mverb'
 data_files = {"train": f"data/{dataset_name}/train.jsonl",
               "test": f"data/{dataset_name}/test.jsonl",
               "val": f"data/{dataset_name}/val.jsonl"}
@@ -19,7 +19,7 @@ newsela = load_dataset('json', data_files=data_files)
 # load metric
 metric = load_metric("rouge")
 
-model_name = f'/home/azagar/myfiles/slo-kit/model/mverb/cjvt-t5-sl-small-mverb-cckres-mverb-small'
+model_name = f'/home/azagar/myfiles/slo-kit/model/mverb/cjvt-t5-sl-small-mverb-cckres-mverb'
 tokenizer = T5Tokenizer.from_pretrained(model_name)
 model = T5ForConditionalGeneration.from_pretrained(model_name)
 
@@ -35,7 +35,7 @@ for n in indices:
     decoded_labels = newsela["test"][n]['tgt_sent'].replace('\n\n', '')
     print("TARGET:\t", decoded_labels)
 
-    sent = "Javni sistem izobraževanja v Sloveniji zagotavlja dobro dostopnost izobraževanja"
+    # sent = "Javni sistem izobraževanja v Sloveniji zagotavlja dobro dostopnost izobraževanja"
     input_ids = tokenizer(f"{prefix} {sent}", return_tensors="pt", max_length=32, truncation=True).input_ids
     input_ids = input_ids.to("cpu")
     outputs = model.generate(input_ids,
