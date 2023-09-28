@@ -6,7 +6,7 @@ from datasets import load_dataset, load_metric
 from transformers import DataCollatorForSeq2Seq
 from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 target_grades = ['V1', 'V2', 'V3', 'V4']
 for g in target_grades:
@@ -21,7 +21,7 @@ for g in target_grades:
     metric = load_metric("rouge")
 
     model_name = "facebook/mbart-large-50"
-    model = MBartForConditionalGeneration.from_pretrained(model_name)
+    model = MBartForConditionalGeneration.from_pretrained(model_name, load_in_8bit=True, device_map='auto')
     tokenizer = MBart50TokenizerFast.from_pretrained(model_name, src_lang="sl_SI", tgt_lang="sl_SI")
 
     # preprocess data
