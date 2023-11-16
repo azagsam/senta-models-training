@@ -1,7 +1,0 @@
-d2v:
-  max_vocab_size: 100000
-  vector_size: 256
-  window: 5
-  min_count: 1
-  workers: 16
-  epochs: 5
